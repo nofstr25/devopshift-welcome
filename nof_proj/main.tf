@@ -24,57 +24,11 @@ resource "azurerm_subnet" "subnet-nof" {
 
 
 
-
-resource "azurerm_linux_virtual_machine" "vm-nof" {
-  name                  = "nof-vm"
-  location              = var.location
-  resource_group_name   = azurerm_resource_group.rg-nof.name
-  network_interface_ids = [azurerm_network_interface.nic-nof.id]
-  size                  = var.vm_size
-
-  os_disk {
-    name              = "nof-os-disk"
-    caching           = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  admin_username = var.admin_username
-  admin_password = var.admin_password
-
-  disable_password_authentication = false
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
-  }
-  computer_name = "nof-vm"
-}
-
-
-module "vm1" {
-  source = "./modules/vm"
-  vm_name = "vm1"
-  nic_id  = azurerm_network_interface.nic1.id
-  location = azurerm_resource_group.Group1.location
-  resource_group_name = azurerm_resource_group.Group1.name
-}
-
-module "vm1" {
-  source = "./modules/vm"
-  vm_name = "vm2"
-  nic_id  = azurerm_network_interface.nic1.id
-  location = azurerm_resource_group.Group1.location
-  resource_group_name = azurerm_resource_group.Group1.name
-}
-
 module "vm1" {
   source = "./modules/vm"
   vm_name = "vm3"
-  nic_id  = azurerm_network_interface.nic1.id
   location = azurerm_resource_group.Group1.location
-  resource_group_name = azurerm_resource_group.Group1.name
+  rg = azurerm_resource_group.Group1.name
 }
 
 

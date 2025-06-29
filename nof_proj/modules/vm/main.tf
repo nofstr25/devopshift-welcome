@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "nic-nof" {
   resource_group_name = var.rg
 
   ip_configuration {
-    name                          = "nof-ipconfig"
+    name                          = "${var.vm_name}-ip"
     subnet_id                     = azurerm_subnet.subnet-nof.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.pip-nof.id
@@ -31,7 +31,7 @@ resource "azurerm_linux_virtual_machine" "vm-nof" {
   size                  = var.vm_size
 
   os_disk {
-    name              = "nof-os-disk"
+    name              = "${vm_name}-disk"
     caching           = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
