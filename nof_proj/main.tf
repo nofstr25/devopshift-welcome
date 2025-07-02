@@ -22,25 +22,11 @@ resource "azurerm_subnet" "subnet-nof" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-
-
 module "vm1" {
   source = "./modules/vm"
   vm_name = "vm3"
-  location = azurerm_resource_group.Group1.location
-  rg = azurerm_resource_group.Group1.name
-}
-
-
-
-
-resource "time_sleep" "wait_for_ip" {
-  create_duration = "120s"  # Wait for 30 seconds
-}
-
-output "vm_publteic_ip" {
-  value = azurerm_public_ip.pip-nof.ip_address
-  description = "Public IP address of the VM"
-  depends_on = [time_sleep.wait_for_ip]
+  rg = azurerm_resource_group.rg-nof.name
+  location = azurerm_resource_group.rg-nof.location
+  subnet_id = azurerm_subnet.subnet-nof.id
 }
 

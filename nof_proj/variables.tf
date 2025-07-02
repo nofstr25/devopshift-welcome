@@ -4,6 +4,9 @@ variable "vm_name" {
 variable "rg" {
 }
 
+variable "subnet_id" {
+}
+
 variable "location" {
   default = "East US"
 }
