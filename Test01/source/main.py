@@ -46,15 +46,24 @@ def get_user_input():
         region = "us-east-2"
 
     #Step 3.1: Select Availability Zone
-    print("\nPlease select an availability Zone (a, b, c):")
+    print("\nPlease select a primary availability Zone (a, b, c):")
     while True:
-        az= input("\n").lower()
-        if az in VALID_AZ:
+        az1= input("\n").lower()
+        if az1 in VALID_AZ:
             break
         else:
+            print("Invalid choice, please enter a valid zone (a, b, c).")
+    print("please select a secondary availability Zone (a, b, c):")
+    while True:
+        az2= input("\n").lower()
+        if az2 not in VALID_AZ:
             print("Invalid choise, please enter a valid zone (a, b, c).")
-
-    # Step 4: Load Balancer Name
+        elif az2 == az1:
+            print("You cannot select the same availability zone twice, please choose a different one.")
+        else:
+            azs = az1 + az2
+            break
+            # Step 4: Load Balancer Name
     alb_name = input("\nEnter a name for your Load Balancer: ").strip()
 
     # Print summary
@@ -62,14 +71,14 @@ def get_user_input():
     print(f"AMI ID: {ami_id}")
     print(f"Instance Type: {instance_type}")
     print(f"Region: {region}")
-    print(f"Availability Zone: {az}")
+    print(f"Availability Zone: {azs}")
     print(f"Load Balancer Name: {alb_name}")
 
     return {
         "ami_id": ami_id,
         "instance_type": instance_type,
         "region": region,
-        "availability_zone": az,
+        "availability_zone": azs,
         "alb_name": alb_name
     }
 
