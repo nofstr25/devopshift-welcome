@@ -1,3 +1,4 @@
+from jinja2 import Environment, FileSystemLoader
 
 UBUNTU_AMI = "ami-0eb9d6fc9fab44d24"
 AMAZON_AMI = "ami-0d1b5a8c13042c939"
@@ -49,10 +50,9 @@ def get_user_input():
     while True:
         az= input("\n").lower()
         if az in VALID_AZ:
-            az = f"{region[0:2]}{az}"
             break
         else:
-            print("Invalid choise, please enter a valid zone (a, b, c, d, e, f).")
+            print("Invalid choise, please enter a valid zone (a, b, c).")
 
     # Step 4: Load Balancer Name
     alb_name = input("\nEnter a name for your Load Balancer: ").strip()
@@ -72,6 +72,15 @@ def get_user_input():
         "availability_zone": az,
         "alb_name": alb_name
     }
+
+def Load_template():
+    env = Environment(loader=FileSystemLoader("."))
+    template = env.get_template("template.txt.j2")
+    output = template.render(config)
+    with open("output.txt", "w") as f:
+        f.write(output)
+    print("\nTemplate rendered and saved to output.txt")
+
 
 # Run the script
 if __name__ == "__main__":
