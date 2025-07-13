@@ -1,3 +1,4 @@
+terraform_template = """
 provider "aws" {
  region = "us-east-2"
 }

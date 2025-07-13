@@ -73,15 +73,17 @@ def get_user_input():
         "alb_name": alb_name
     }
 
-def Load_template():
-    env = Environment(loader=FileSystemLoader("."))
+def Load_template(config): #Pass the variable into a jinja2 template
+    env = Environment(loader=FileSystemLoader("./source")) 
     template = env.get_template("template.txt.j2")
     output = template.render(config)
-    with open("output.txt", "w") as f:
-        f.write(output)
-    print("\nTemplate rendered and saved to output.txt")
+    with open("vars.txt", "w") as file:
+        file.write(output)
+    print("\nTemplate rendered and saved to vars.txt")
 
 
 # Run the script
 if __name__ == "__main__":
     config = get_user_input()
+    Load_template(config)
+    print("\nDeployment configuration completed successfully.")
