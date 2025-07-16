@@ -1,4 +1,6 @@
+from python_terraform import Terraform, IsFlagged, IsNotFlagged, TerraformCommandError
 from jinja2 import Environment, FileSystemLoader
+import sys
 
 UBUNTU_AMI = "ami-0eb9d6fc9fab44d24"
 AMAZON_AMI = "ami-0d1b5a8c13042c939"
@@ -86,13 +88,66 @@ def Load_template(config): #Pass the variable into a jinja2 template
     env = Environment(loader=FileSystemLoader("./source")) 
     template = env.get_template("template.txt.j2")
     output = template.render(config)
-    with open("vars.txt", "w") as file:
+    with open("./Terraform/main.tf", "w") as file:
         file.write(output)
-    print("\nTemplate rendered and saved to vars.txt")
+    print("\nTemplate rendered and saved to main.tf")
 
+def run_terraform():
+    tf = Terraform(working_dir='./Terraform')  # assuming you run script where terraform files are
+
+    print("\nInitializing Terraform...")
+    return_code, stdout, stderr = tf.init()
+    if return_code not in (0, 2):
+        print("Terraform init failed:")
+        print(return_code)
+        print(stderr)
+        sys.exit(1)
+    print(stdout)
+
+    print("\nPlanning Terraform deployment...")
+    return_code, stdout, stderr = tf.plan(no_color=IsFlagged)
+    if return_code not in (0, 2):
+        print("Terraform plan failed:")
+        print(return_code)
+        print(stderr)
+        sys.exit(1)
+    print(stdout)
+
+    print("\nApplying Terraform deployment...")
+    return_code, stdout, stderr = tf.apply(skip_plan=True, no_color=IsFlagged, capture_output=True, auto_approve=True)
+    if return_code not in (0, 2):
+        print("Terraform apply failed:")
+        print(return_code)
+        print(stderr)
+        sys.exit(1)
+    print(stdout)
+
+    # After apply, get outputs
+    print("\nFetching Terraform outputs...")
+    try:
+        return_code, outputs, stderr = tf.output()
+    except Exception as e:
+        print(f"NOF Didn't get to part 1: {e}")
+        sys.exit(1)
+    if return_code != 0:
+        print("Failed to get Terraform outputs:")
+        print(return_code)
+        print("NOF Didnt get to part 2: ", stderr)
+        sys.exit(1)
+    try: 
+        print("Terraform Outputs:")
+        for key, value in outputs.items():
+            print(f"{key}: {value['value']}")
+    except Exception as e:
+        print(f"Error fetching outputs: {e}")
+        print("NOF Didnt get to part 3: ", stderr)
+        sys.exit(1)
 
 # Run the script
 if __name__ == "__main__":
     config = get_user_input()
     Load_template(config)
     print("\nDeployment configuration completed successfully.")
+
+    run_terraform()
+    print("\nTerraform deployment completed successfully.")

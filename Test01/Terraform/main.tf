@@ -5,7 +5,7 @@ provider "aws" {
 resource "aws_security_group" "lb_sg" {
   name        = "lb_security_group-nof"
   description = "Allow HTTP inbound traffic"
-  vpc_id = "vpc-0a691b1cda1dea4be"
+  vpc_id = "vpc-084687c42bc6b6be7"
 
   ingress {
     from_port   = 80
@@ -23,10 +23,10 @@ resource "aws_security_group" "lb_sg" {
 }
 
 resource "aws_instance" "web_server" {
-  ami               = "ami-0d1b5a8c13042c939"
+  ami               = "ami-0eb9d6fc9fab44d24"
   instance_type     = "t3.small"
   availability_zone = "us-east-2a"
-  subnet_id         = "subnet-09a9b4fe4e74051b3"  # Attach to a specific subnet
+  subnet_id         = "subnet-0dba81b888eb03998"  # Attach to a specific subnet
 
   tags = {
     Name = "WebServer"
@@ -34,18 +34,18 @@ resource "aws_instance" "web_server" {
 }
 
 resource "aws_lb" "application_lb" {
-  name               = "nofcheck01"
+  name               = "nof2"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = ["subnet-09a9b4fe4e74051b3", "subnet-05860172a9327d826"]
+  subnets            = ["subnet-0dba81b888eb03998", "subnet-0caaa6ff3c583ca10"]
 }
 
 resource "aws_lb_target_group" "web_target_group" {
   name     = "web-target-group-nof01"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = "vpc-0a691b1cda1dea4be"
+  vpc_id   = "vpc-084687c42bc6b6be7"
 }
 
 resource "aws_lb_listener" "http_listener" {
@@ -64,3 +64,17 @@ resource "aws_lb_target_group_attachment" "web_instance_attachment" {
   target_id        = aws_instance.web_server.id
 }
 
+output "instance_id" {
+  description = "The ID of the EC2 instance"
+  value       = aws_instance.web_server.id
+}
+
+output "public_ip" {
+  description = "The public IP of the EC2 instance"
+  value       = aws_instance.web_server.public_ip
+}
+
+output "load_balancer_dns_name" {
+  description = "The DNS name of the Application Load Balancer"
+  value       = aws_lb.application_lb.dns_name
+}
