@@ -1,6 +1,8 @@
 from python_terraform import Terraform, IsFlagged, IsNotFlagged, TerraformCommandError
 from jinja2 import Environment, FileSystemLoader
 import sys
+import boto3
+import json
 
 UBUNTU_AMI = "ami-0eb9d6fc9fab44d24"
 AMAZON_AMI = "ami-0d1b5a8c13042c939"
@@ -142,6 +144,52 @@ def run_terraform():
         print(f"Error fetching outputs: {e}")
         print("NOF Didnt get to part 3: ", stderr)
         sys.exit(1)
+    instance_id = outputs["instance_id"]["value"]
+    lb_dns = outputs["lb_dns_name"]["value"]
+    return instance_id, lb_dns
+
+
+
+def validate_aws_resources(instance_id, lb_dns, region="us-east-2"):
+    import boto3
+    import json
+
+    print("\nValidating AWS resources with boto3...")
+    ec2 = boto3.client("ec2", region_name=region)
+    elb = boto3.client("elbv2", region_name=region)
+
+    try:
+        # Get EC2 instance details
+        ec2_resp = ec2.describe_instances(InstanceIds=[instance_id])
+        reservations = ec2_resp["Reservations"]
+        if not reservations or not reservations[0]["Instances"]:
+            raise Exception("Instance not found")
+        instance = reservations[0]["Instances"][0]
+        instance_state = instance["State"]["Name"]
+        public_ip = instance.get("PublicIpAddress", "N/A")
+
+        # Get ALB DNS name
+        lb_resp = elb.describe_load_balancers()
+        lb_dns_found = next((lb["DNSName"] for lb in lb_resp["LoadBalancers"] if lb["DNSName"] == lb_dns), None)
+
+        if not lb_dns_found:
+            raise Exception("Load balancer not found")
+
+        # Save to JSON
+        validation_data = {
+            "instance_id": instance_id,
+            "instance_state": instance_state,
+            "public_ip": public_ip,
+            "load_balancer_dns": lb_dns_found
+        }
+        with open("aws_validation.json", "w") as f:
+            json.dump(validation_data, f, indent=4)
+        print("✅ AWS validation successful. Data saved to aws_validation.json.")
+
+    except Exception as e:
+        print(f"❌ AWS Validation failed: {e}")
+        sys.exit(1)
+
 
 # Run the script
 if __name__ == "__main__":
@@ -149,5 +197,9 @@ if __name__ == "__main__":
     Load_template(config)
     print("\nDeployment configuration completed successfully.")
 
-    run_terraform()
+    instance_id, lb_dns = run_terraform()
+
     print("\nTerraform deployment completed successfully.")
+
+    # Validate AWS resources
+    validate_aws_resources(instance_id, lb_dns, region=config["region"])
