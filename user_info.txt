@@ -1,0 +1,3 @@
+GITBRANCH=workshop/ansible
+GITURL=github.com/nofstr25/devopshift-welcome.git
+GITUSERNAME=nofstr25
