@@ -1,29 +1,6 @@
 - name: Creating Files
   hosts: all
   become: true
-
-  tasks:
-    - name: create folder
-      file: 
-        path: /tmp/testdir
-        state: directory
-        mode: '0777'
-
-    - name: create file
-      copy: 
-        dest: /tmp/testdir/Hello.txt
-        content: "Hello, Omri"
-
-    - name: Change Owner
-      file: 
-        path: /tmp/testdir/Hello.txt
-        owner: nobody
-        mode: '0777'
-
-    - name: Verify content
-      shell: cat /tmp/testdir/Hello.txt
-      register: cat_result
-
-    - name: Show file content
-      debug:
-        var: cat_result.stdout
+    roles:
+    - FileManagment
+    - UserManagment
