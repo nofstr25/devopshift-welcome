@@ -1,0 +1,44 @@
+- name: Create group developers
+    group:
+      name: developers
+      state: present
+
+- name: Create user1 and add to developers group
+  user:
+    name: user1
+    group: developers
+    create_home: yes
+    state: present
+
+- name: Create user2 and add to developers group
+  user:
+    name: user2
+    group: developers
+    create_home: yes
+    state: present
+
+- name: Validate group developers exists and show members
+  shell: getent group developers
+  register: group_info
+
+- name: Show developers group info
+  debug:
+    var: group_info.stdout
+
+- name: Validate user1 exists
+  shell: id user1
+  register: user1_info
+  ignore_errors: yes
+
+- name: Show user1 info
+  debug:
+    var: user1_info.stdout
+
+- name: Validate user2 exists
+  shell: id user2
+  register: user2_info
+  ignore_errors: yes
+
+- name: Show user2 info
+  debug:
+    var: user2_info.stdout
