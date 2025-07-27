@@ -1,0 +1,5 @@
+- name: Create a custom index.html
+  copy:
+    content: "<h1>Welcome to Modular Ansible NGINX</h1>"
+    dest: /var/www/html/index.html
+
