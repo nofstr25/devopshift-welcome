@@ -1,0 +1,10 @@
+- name: Web Server
+  hosts: all
+  become: true
+  vars:
+    sites:
+      - { domain: "example.com", docroot: "/var/www/example" }
+      - { domain: "test.com", docroot: "/var/www/test" }
+  roles:
+    - CreateServer
+    # - UserManagment

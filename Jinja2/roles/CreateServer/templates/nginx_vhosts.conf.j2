@@ -1,0 +1,7 @@
+{% for site in sites %}
+server {
+    listen 80;
+    server_name {{ site.domain }};
+    root {{ site.docroot }};
+}
+{% endfor %}

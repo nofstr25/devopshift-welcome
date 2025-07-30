@@ -1,9 +1,0 @@
-
-- name: Setup NGINX Web Server
-  hosts: localhost
-  become: true
-
-  tasks:
-    - import_tasks: tasks/install.yaml
-    - import_tasks: tasks/validate.yaml
-    - import_tasks: tasks/deploy.yaml
