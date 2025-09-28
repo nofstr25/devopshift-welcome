@@ -1,7 +1,7 @@
 # Starting off with the Jenkins base Image
 # Using Specific version to avoid issues (2.426.3 is up2date to aug jul14 2024)
 FROM jenkins/jenkins:2.462.3
-# FROM jenkins/jenkins:2.452.3
+# FROM jenkins/jenkins:2.452.3a
  
 # Installing the plugins we need using the in-built jenkins-plugin-cli script instead of manual install plugins
 RUN /bin/jenkins-plugin-cli --plugins git matrix-auth credentials-binding workflow-aggregator docker-workflow blueocean job-dsl workflow-job workflow-cps 
