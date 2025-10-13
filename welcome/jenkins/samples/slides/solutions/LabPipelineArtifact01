@@ -64,10 +64,6 @@ pipeline {
             }
         }
 
-
-
-
-
         stage('Verify Application') {
             steps {
                 dir("${PROJECT_HOME}") {
@@ -138,7 +134,6 @@ echo 'Running automated tests...'
             }
         }
     
-
         stage('Archive Artifacts') {
             steps {
                 dir("${PROJECT_HOME}") {

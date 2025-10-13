@@ -6,7 +6,6 @@ pipeline {
         PROJECT_HOME = "${WORKSPACE}/welcome/app/flask-volt-dashboard"
         FLASK_APP = 'run.py'
         FLASK_ENV = 'development'
-        DOCKERFILESRC = "${WORKSPACE}/welcome/jenkins/samples/solutions/simplepipline/dockersamples/"
     }
 
     stages {
@@ -17,50 +16,24 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment - build') {
+        stage('Setup Python Environment and Install Dependencies') {
             steps {
                 dir("${PROJECT_HOME}") {
                     script {
                         // Install virtualenv if not available
-                         echo "Builder"
-                         sh '''#!/bin/bash
-                                
-                                docker build --target build -t yaniv -f $DOCKERFILESRC .
+                        sh '''#!/bin/bash
+                        if ! command -v virtualenv &> /dev/null; then
+                            echo "Installing virtualenv..."
+                            pip install virtualenv
+                        fi
 
-                        '''
-                    }
-                }
-            }
-        }
+                        # Delete previously built virtualenv and create a new one
+                        rm -rf $PYENV_HOME
+                        virtualenv $PYENV_HOME
+                        source $PYENV_HOME/bin/activate
 
-        stage('Parallel Execution') {
-            parallel {
-                stage('Install dependencies') {
-                    steps {
-                        dir("${PROJECT_HOME}") {
-                            script {
-                                // Install virtualenv if not available
-                                sh '''#!/bin/bash
-                                # Delete previously built virtualenv and create a new one
-                                rm -rf $PYENV_HOME
-                                virtualenv $PYENV_HOME
-                                source $PYENV_HOME/bin/activate
-
-                                # Install required Python packages
-                                pip install -r requirements.txt
-                                '''
-                            }
-                        }
-                    }
-                }
-                stage('REDIS TESTING') {
-                    steps {
-                        echo "Hello World"
-                         sh '''#!/bin/bash
-                                
-                                docker run -tid --rm --name redis redis:latest
-                                docker ps 
-                                docker kill redis
+                        # Install required Python packages
+                        pip install -r requirements.txt
                         '''
                     }
                 }
@@ -108,6 +81,54 @@ pipeline {
                         } else {
                             echo "Flask application is running successfully."
                         }
+                    }
+                }
+            }
+        }
+        stage('Manual QA Approval') {
+            steps {
+                script {
+                    // Wait for user interaction and store the result
+                    def userInput = input message: 'Is the application running successfully? ',
+                                         parameters: [choice(name: 'Proceed', choices: 'Proceed\nAbort', description: 'use the URL: http://REMOTEIP:5005 and Choose an option')]
+                    // Set a variable based on user input
+                    env.USER_CHOICE = userInput
+                }
+            }
+        }
+        stage('Automated Tests') {
+            // Run this stage ONLY! if the user chooses 'Proceed'
+
+            when {
+                expression { env.USER_CHOICE == 'Proceed' }
+            }
+            steps {
+                script {
+echo 'Running automated tests...'
+                }
+            }
+        }
+
+        stage('Failed Manual QA Approval') {
+            // Run this stage ONLY if the user chooses 'Abort'
+            when {
+                expression { env.USER_CHOICE == 'Abort' }
+            }
+            steps {
+                script {
+                    error 'Pipeline aborted by the user'
+                }
+            }
+        }
+
+        // Run this stage regardless of the user choice but we will check the user choice in the stage and print a message
+        stage('Finalize the Pipeline') {
+            steps {
+                script {
+                    if (env.USER_CHOICE == 'Proceed') {
+                        echo 'Manual QA and automated tests approved, pipeline completed successfully'
+                    } else {
+                        echo 'Pipeline aborted by the user'
                     }
                 }
             }

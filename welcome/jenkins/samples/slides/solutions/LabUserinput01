@@ -133,6 +133,14 @@ echo 'Running automated tests...'
                 }
             }
         }
+
+    stage('Archive Artifacts') {
+    steps {
+        dir("${PROJECT_HOME}") {
+            archiveArtifacts artifacts: 'flask_app.log', allowEmptyArchive: true
+                }
+            }
+        }
     }
 
     post {
